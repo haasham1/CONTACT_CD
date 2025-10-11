@@ -1,16 +1,15 @@
-# Stage 1: Use Node to build the app
-FROM node:14
+# Frontend Dockerfile
 
+# 1️⃣ Build stage
+FROM node:18 AS build
 WORKDIR /app
-
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm install
-
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve build with serve
-RUN npm install -g serve
-
-EXPOSE 5000
-CMD ["serve", "-s", "build", "-l", "5000"]
+# 2️⃣ Serve stage
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 3000
+CMD ["nginx", "-g", "daemon off;"]
